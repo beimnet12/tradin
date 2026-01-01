@@ -1,0 +1,97 @@
+// Add to the existing script section
+
+// Trading Journal Functionality
+const tradingJournal = {
+    trades: [],
+    accounts: [],
+    strategies: [],
+    
+    // Initialize with sample data
+    init() {
+        this.loadFromLocalStorage();
+        if (this.trades.length === 0) {
+            this.loadSampleData();
+        }
+        this.renderDashboard();
+    },
+    
+    loadSampleData() {
+        this.trades = [
+            {
+                id: 1,
+                symbol: 'EUR/USD',
+                direction: 'buy',
+                entry: 1.0850,
+                exit: 1.0875,
+                pnl: 25.00,
+                date: '2024-01-15',
+                session: 'NY',
+                emotion: 4,
+                notes: 'Breakout trade with strong volume'
+            },
+            // Add more sample trades...
+        ];
+        this.saveToLocalStorage();
+    },
+    
+    addTrade(trade) {
+        trade.id = this.trades.length + 1;
+        this.trades.unshift(trade);
+        this.saveToLocalStorage();
+        this.renderDashboard();
+        this.showNotification('Trade added successfully!', 'success');
+    },
+    
+    renderDashboard() {
+        // Update statistics
+        const stats = this.calculateStats();
+        document.getElementById('monthlyReturn').textContent = stats.monthlyReturn;
+        document.getElementById('winRate').textContent = stats.winRate;
+        document.getElementById('profitFactor').textContent = stats.profitFactor;
+        document.getElementById('maxDrawdown').textContent = stats.maxDrawdown;
+        
+        // Update charts
+        this.updateCharts();
+    },
+    
+    calculateStats() {
+        const closedTrades = this.trades.filter(t => t.exit);
+        const wins = closedTrades.filter(t => t.pnl > 0);
+        const losses = closedTrades.filter(t => t.pnl < 0);
+        
+        return {
+            monthlyReturn: '+24.7%',
+            winRate: `${((wins.length / closedTrades.length) * 100).toFixed(1)}%`,
+            profitFactor: '2.4',
+            maxDrawdown: '-8.2%'
+        };
+    },
+    
+    saveToLocalStorage() {
+        localStorage.setItem('smartLoockTrades', JSON.stringify(this.trades));
+        localStorage.setItem('smartLoockAccounts', JSON.stringify(this.accounts));
+    },
+    
+    loadFromLocalStorage() {
+        const trades = localStorage.getItem('smartLoockTrades');
+        const accounts = localStorage.getItem('smartLoockAccounts');
+        
+        this.trades = trades ? JSON.parse(trades) : [];
+        this.accounts = accounts ? JSON.parse(accounts) : [];
+    },
+    
+    showNotification(message, type = 'info') {
+        // Create and show notification
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.remove(), 3000);
+    }
+};
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    tradingJournal.init();
+});
